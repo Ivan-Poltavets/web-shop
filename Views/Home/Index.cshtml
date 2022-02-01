@@ -1,0 +1,27 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+@model IEnumerable<OnlineShop.Models.Product>
+
+<div class="row">
+    @foreach(var item in Model)
+    {
+        <div class="card" style="width:18rem;margin:10px;">
+            @if (item.ImagePath != "null")
+            {
+                <img src="~/Upload/@item.ImagePath" class="card-img-top" style="margin:0;height:10rem;">
+            }
+            else
+            {
+                <img src="~/Upload/default.jpg" class="card-img-top" style="margin:0;height:10rem;">
+            }
+            <div class="card-body">
+                <h5 class="card-title">@item.Name</h5>
+                <h5 class="card-text">@item.Price</h5>
+            </div>
+        </div>
+    }
+</div>
+
+
