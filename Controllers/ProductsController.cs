@@ -8,19 +8,21 @@ using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.AspNetCore.Authorization;
 
 namespace OnlineShop.Controllers
 {
     public class ProductsController : Controller
     {
-        private readonly OnlineShopContext _context;
+        private readonly ApplicationContext _context;
         private readonly IWebHostEnvironment _environment;
 
 
-        public ProductsController(OnlineShopContext context)
+        public ProductsController(ApplicationContext context)
         {
             _context = context;
         }
+        [Authorize]
         public async Task<IActionResult> Index()
         {
             return View(await _context.Product.ToListAsync());

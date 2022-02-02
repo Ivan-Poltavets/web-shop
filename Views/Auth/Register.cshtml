@@ -1,0 +1,17 @@
+﻿@{
+    ViewData["Title"] = "Login";
+}
+@model OnlineShop.Models.RegisterModel
+<div class="row">
+    <div class="col-md-4">
+        <form method="post" asp-action="Register">
+            <label asp-for="Username"></label>
+            <input asp-for="Username" class="form-control" />
+            <label asp-for="Email"></label>
+            <input asp-for="Email" class="form-control" />
+            <label asp-for="Password"></label>
+            <input asp-for="Password" type="password" class="form-control" />
+            <button type="submit" class="btn btn-primary">Register</button>
+        </form>
+    </div>
+</div>
