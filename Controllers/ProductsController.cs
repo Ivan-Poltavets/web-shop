@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace OnlineShop.Controllers
 {
+    [Authorize]
     public class ProductsController : Controller
     {
         private readonly ApplicationContext _context;
@@ -22,7 +23,7 @@ namespace OnlineShop.Controllers
         {
             _context = context;
         }
-        [Authorize]
+        
         public async Task<IActionResult> Index()
         {
             return View(await _context.Product.ToListAsync());

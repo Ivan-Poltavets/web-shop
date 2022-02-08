@@ -3,22 +3,27 @@ using Microsoft.AspNetCore.Identity;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using OnlineShop.Models;
-using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Authentication;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace OnlineShop.Controllers
 {
-    public class AuthController : Controller
+    public class AccountController : Controller
     {
+        private readonly SignInManager<IdentityUser> _signInManager;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IConfiguration _configuration;
 
-        public AuthController(
+        public AccountController(
+            SignInManager<IdentityUser> signInManager,  
             UserManager<IdentityUser> userManager,
             RoleManager<IdentityRole> roleManager,
             IConfiguration configuration)
         {
+            _signInManager = signInManager;
             _userManager = userManager;
             _roleManager = roleManager;
             _configuration = configuration;
@@ -32,35 +37,27 @@ namespace OnlineShop.Controllers
         {
             return View();
         }
+        public IActionResult Logout()
+        {
+            return View();
+        }
 
         [HttpPost]
-        public async Task<IActionResult> Login(LoginModel model)
+        public async Task<IActionResult> Login(LoginModel model,bool rememberMe=false,string returnUrl=null)
         {
-            var user = await _userManager.FindByNameAsync(model.Username);
-            if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
+            var userExists = await _userManager.FindByNameAsync(model.Username);
+            if (userExists == null) return View();
+            if (await _userManager.CheckPasswordAsync(userExists, model.Password))
             {
-                var userRoles = await _userManager.GetRolesAsync(user);
-
-                var authClaims = new List<Claim>
+                var result = await _signInManager.PasswordSignInAsync(userExists,model.Password,rememberMe,lockoutOnFailure:true);
+                if (result.Succeeded)
                 {
-                    new Claim(ClaimTypes.Name, user.UserName),
-                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                };
-
-                foreach (var userRole in userRoles)
-                {
-                    authClaims.Add(new Claim(ClaimTypes.Role, userRole));
+                    if(returnUrl !=null)return LocalRedirect(returnUrl);
+                    return LocalRedirect("/");
                 }
-
-                var token = GetToken(authClaims);
-
-                return Ok(new
-                {
-                    token = new JwtSecurityTokenHandler().WriteToken(token),
-                    expiration = token.ValidTo
-                });
+                return View();
             }
-            return Unauthorized();
+            return View();
         }
 
         [HttpPost]
@@ -115,21 +112,17 @@ namespace OnlineShop.Controllers
             }
             return Ok(new Response { Status = "Success", Message = "User created successfully!" });
         }
-
-        private JwtSecurityToken GetToken(List<Claim> authClaims)
+        [HttpPost]
+        public async Task<IActionResult> Logout(string returnUrl = null)
         {
-            var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
-
-            var token = new JwtSecurityToken(
-                issuer: _configuration["JWT:ValidIssuer"],
-                audience: _configuration["JWT:ValidAudience"],
-                expires: DateTime.Now.AddHours(3),
-                claims: authClaims,
-                signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
-                );
-
-            return token;
+            await _signInManager.SignOutAsync();
+            if (returnUrl != null)
+            {
+                return LocalRedirect(returnUrl);
+            }
+            return LocalRedirect("/");
         }
+
     }
 }
 
