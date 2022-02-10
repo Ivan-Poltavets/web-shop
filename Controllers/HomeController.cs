@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using OnlineShop.Models;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 namespace OnlineShop.Controllers
 {
@@ -36,5 +38,23 @@ namespace OnlineShop.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+        [HttpPost]
+        public async Task<IActionResult> Search(string search)
+        {
+            List<Product> products = await _context.Product.ToListAsync();
+            Regex regex = new Regex(search,RegexOptions.IgnoreCase);
+            List<Product> searchItems= new List<Product>();
+            
+            foreach(var item in products)
+            {
+                Match match = regex.Match(item.Name);
+                if (match.Success)
+                {
+                    searchItems.Add(item);
+                }
+            }
+            return View(searchItems);
+        }
+
     }
 }

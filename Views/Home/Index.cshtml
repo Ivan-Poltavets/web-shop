@@ -26,6 +26,9 @@
                 </div>
             </div>
         </div>
+        @{
+            int carouselItems = 2;
+        }
         @foreach (var carouselItem in Model)
         {
             <div class="carousel-item">
@@ -33,12 +36,14 @@
 
                 <div class="container">
                     <div class="carousel-caption text-end">
-                        <h1>One more for good measure.</h1>
+                        <h1>@carouselItem.Name</h1>
                         <p>Some representative placeholder content for the third slide of this carousel.</p>
-                        <p><a class="btn btn-lg btn-primary" href="#">Browse gallery</a></p>
+                        <p><a class="btn btn-lg btn-primary" href="#">Browse product</a></p>
                     </div>
                 </div>
             </div>
+            carouselItems--;
+            if (carouselItems == 0) break;
         }
     </div>
     <button class="carousel-control-prev" type="button" data-bs-target="#myCarousel" data-bs-slide="prev">
@@ -51,23 +56,25 @@
     </button>
 </div>
 
-<div class="row">
-    @foreach (var item in Model)
-    {
-        <div class="card mb-3" style="width:18rem;margin:10px;">
-            @if (item.ImagePath != "null")
-            {
-                <img src="~/Upload/@item.ImagePath" class="card-img-top">
-            }
-            else
-            {
-                <img src="~/Upload/default.jpg" class="card-img-top" style="margin:0;height:10rem;">
-            }
-            <div class="card-body">
-                <h5 class="card-title">@item.Name</h5>
-                <h5 class="card-text">@item.Price</h5>
+<div class="container">
+    <div class="row">
+        @foreach (var item in Model)
+        {
+            <div class="card mb-3" style="width:16rem;padding:0;margin-left:20px">
+                @if (item.ImagePath != "null")
+                {
+                    <img src="~/Upload/@item.ImagePath" class="card-img-top" style="width:100%;height:150px;">
+                }
+                else
+                {
+                    <img src="~/Upload/default.jpg" class="card-img-top" style="width:100%;height:150px">
+                }
+                <div class="card-body">
+                    <h5 class="card-title">@item.Name</h5>
+                    <h5 class="card-text">@(item.Price)$</h5>
+                </div>
             </div>
-        </div>
-    }
+        }
+    </div>
+    <div class=""></div>
 </div>
-
