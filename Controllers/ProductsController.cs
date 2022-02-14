@@ -1,18 +1,13 @@
 ﻿#nullable disable
 using System.Web;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using OnlineShop.Models;
-using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.AspNetCore.Authorization;
 
 namespace OnlineShop.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = UserRoles.Admin)]
     public class ProductsController : Controller
     {
         private readonly ApplicationContext _context;
@@ -26,7 +21,7 @@ namespace OnlineShop.Controllers
         
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Product.ToListAsync());
+            return View(await _context.Products.ToListAsync());
         }
         public async Task<IActionResult> Details(int? id)
         {
@@ -35,8 +30,8 @@ namespace OnlineShop.Controllers
                 return NotFound();
             }
 
-            var product = await _context.Product
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var product = await _context.Products
+                .FirstOrDefaultAsync(x => x.Id == id);
             if (product == null)
             {
                 return NotFound();
@@ -63,11 +58,11 @@ namespace OnlineShop.Controllers
                     {
                         await uploadFile.CopyToAsync(stream);
                     }
-                    product.ImagePath = fileName;
+                    product.ImageName = fileName;
                 }
                 else
                 {
-                    product.ImagePath = "null";
+                    product.ImageName = "null";
                 }
                 _context.Add(product);
                 await _context.SaveChangesAsync();
@@ -82,7 +77,7 @@ namespace OnlineShop.Controllers
                 return NotFound();
             }
 
-            var product = await _context.Product.FindAsync(id);
+            var product = await _context.Products.FindAsync(id);
             if (product == null)
             {
                 return NotFound();
@@ -127,8 +122,8 @@ namespace OnlineShop.Controllers
                 return NotFound();
             }
 
-            var product = await _context.Product
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var product = await _context.Products
+                .FirstOrDefaultAsync(x => x.Id == id);
             if (product == null)
             {
                 return NotFound();
@@ -140,18 +135,18 @@ namespace OnlineShop.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var product = await _context.Product.FindAsync(id);
-            string pathFile = Path.Combine("wwwroot", "Upload", product.ImagePath);
+            var product = await _context.Products.FindAsync(id);
+            string pathFile = Path.Combine("wwwroot", "Upload", product.ImageName);
             FileInfo file = new FileInfo(pathFile);
             file.Delete();
-            _context.Product.Remove(product);
+            _context.Products.Remove(product);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool ProductExists(int id)
         {
-            return _context.Product.Any(e => e.Id == id);
+            return _context.Products.Any(e => e.Id == id);
         }
         [HttpGet]
         public async Task<IActionResult> Upload(int? id)
@@ -160,7 +155,7 @@ namespace OnlineShop.Controllers
             {
                 return NotFound();
             }
-            var product = await _context.Product.FindAsync(id);
+            var product = await _context.Products.FindAsync(id);
             if (product == null)
             {
                 return NotFound();
@@ -175,9 +170,9 @@ namespace OnlineShop.Controllers
         {
             if(uploadFile != null)
             {
-                var product = await _context.Product.FindAsync(id);
+                var product = await _context.Products.FindAsync(id);
                 string directory = Path.Combine("wwwroot", "Upload");
-                FileInfo deleteFile = new FileInfo(Path.Combine(directory, product.ImagePath));
+                FileInfo deleteFile = new FileInfo(Path.Combine(directory, product.ImageName));
                 deleteFile.Delete();
                 string extension = Path.GetExtension(uploadFile.FileName);
                 string fileName = Guid.NewGuid().ToString() + extension;
@@ -186,7 +181,7 @@ namespace OnlineShop.Controllers
                 {
                     await uploadFile.CopyToAsync(stream);
                 }
-                product.ImagePath = fileName;
+                product.ImageName = fileName;
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }

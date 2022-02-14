@@ -1,4 +1,5 @@
 ﻿@model IEnumerable<OnlineShop.Models.Product>
+@inject GetNameById GetNameById
 
 @{
     ViewData["Title"] = "Admin panel";
@@ -7,15 +8,21 @@
     <h1>Panel</h1>
 
     <form asp-action="Create">
+        <div class="btn-group" role="group" aria-label="Basic example">
         <p>
             <button class="btn btn-primary">Create Product</button>
+            <a class="btn btn-primary" asp-controller="Categories" asp-action="Index">Back to Categories</a>
         </p>
+        </div>
     </form>
     <table class="table">
         <thead>
             <tr>
                 <th>
                     Name Product
+                </th>
+                <th>
+                    Category
                 </th>
                 <th>
                     Image
@@ -34,7 +41,10 @@
                         @item.Name
                     </td>
                     <td>
-                        @item.ImagePath
+                        @GetNameById.Execute(item.CategoryId)
+                    </td>
+                    <td>
+                        @item.ImageName
                     </td>
                     <td>
                         @item.Price

@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 ConfigurationManager configuration = builder.Configuration;
-
+builder.Services.AddTransient<GetNameById>();
 builder.Services.AddDbContext<ApplicationContext>(options =>
 
     options.UseSqlServer(builder.Configuration.GetConnectionString("OnlineShopContext")));
@@ -33,6 +33,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 builder.Services.AddRazorPages();
 builder.Services.AddControllersWithViews();
+
 
 var app = builder.Build();
 

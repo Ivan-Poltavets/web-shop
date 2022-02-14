@@ -1,0 +1,47 @@
+﻿@model IEnumerable<OnlineShop.Models.Category>
+
+@{
+    ViewData["Title"] = "Admin panel";
+}
+<div class="container">
+    <h1>Categories</h1>
+
+    <form asp-action="Create">
+        <div class="btn-group">
+            <p>
+                <button class="btn btn-primary">Create Category</button>
+                <a class="btn btn-primary" asp-controller="Products" asp-action="Index">Products</a>
+            </p>
+        </div>
+    </form>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    Id
+                </th>
+                <th>
+                    Name
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @item.Id
+                    </td>
+                    <td>
+                        @item.Name
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                        <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -1,7 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 using OnlineShop.Models;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
@@ -18,19 +16,9 @@ namespace OnlineShop.Controllers
             _logger = logger;
             _context = context;
         }
-
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Product.ToListAsync());
-        }
-
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-        public IActionResult Contact()
-        {
-            return View();
+            return View(await _context.Products.ToListAsync());
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
@@ -41,7 +29,8 @@ namespace OnlineShop.Controllers
         [HttpPost]
         public async Task<IActionResult> Search(string search)
         {
-            List<Product> products = await _context.Product.ToListAsync();
+            if (search == null) return View();
+            List<Product> products = await _context.Products.ToListAsync();
             Regex regex = new Regex(search,RegexOptions.IgnoreCase);
             List<Product> searchItems= new List<Product>();
             
