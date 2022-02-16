@@ -1,0 +1,25 @@
+﻿@model OnlineShop.Models.CartItem
+
+<html>
+<head>
+
+</head>
+<body>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h4>Change quantity</h4>
+        </div>
+        <div class="modal-body">
+            <form method="post" asp-action="ChangeQuantity">
+                <input hidden asp-for="Id" />
+                <input hidden asp-for="CartId" />
+                <input hidden asp-for="ProductId" />
+                <input asp-for="Quantity" value="@Model.Quantity" class="form-control" />
+                <span asp-validation-for="Quantity" class="text-danger"></span>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </form>
+
+        </div>
+    </div>
+</body>
+</html>

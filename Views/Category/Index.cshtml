@@ -6,14 +6,12 @@
 <div class="container">
     <h1>Categories</h1>
 
-    <form asp-action="Create">
-        <div class="btn-group">
-            <p>
-                <button class="btn btn-primary">Create Category</button>
-                <a class="btn btn-primary" asp-controller="Products" asp-action="Index">Products</a>
-            </p>
-        </div>
-    </form>
+    <div class="btn-group">
+        <p>
+            <a class="btn btn-primary" asp-action="Create">Create Category</a>
+            <a class="btn btn-primary" asp-controller="Product" asp-action="Index">Products</a>
+        </p>
+    </div>
     <table class="table">
         <thead>
             <tr>

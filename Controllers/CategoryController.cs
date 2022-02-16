@@ -6,10 +6,10 @@ using Microsoft.AspNetCore.Authorization;
 namespace OnlineShop.Controllers
 {
     [Authorize(Roles = UserRoles.Admin)]
-    public class CategoriesController : Controller
+    public class CategoryController : Controller
     {
         private readonly ApplicationContext _context;
-        public CategoriesController(ApplicationContext context)
+        public CategoryController(ApplicationContext context)
         {
             _context = context;
         }
@@ -49,7 +49,7 @@ namespace OnlineShop.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreatePost(Category category)
+        public async Task<IActionResult> Create(Category category)
         {
             if (category != null)
             {
@@ -65,7 +65,7 @@ namespace OnlineShop.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditPost(int id,Category category)
+        public async Task<IActionResult> Edit(int id,Category category)
         {
             if(ModelState.IsValid)
             {
@@ -77,7 +77,7 @@ namespace OnlineShop.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeletePost(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             var category = await _context.Categories.FindAsync(id);
             if (category != null)

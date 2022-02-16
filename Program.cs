@@ -7,10 +7,11 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using OnlineShop.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 ConfigurationManager configuration = builder.Configuration;
-builder.Services.AddTransient<GetNameById>();
+builder.Services.AddTransient<IProductRepository, ProductRepository>();
 builder.Services.AddDbContext<ApplicationContext>(options =>
 
     options.UseSqlServer(builder.Configuration.GetConnectionString("OnlineShopContext")));

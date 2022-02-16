@@ -1,5 +1,5 @@
 ﻿@model IEnumerable<OnlineShop.Models.Product>
-@inject GetNameById GetNameById
+@inject IProductRepository ProductRepository
 
 @{
     ViewData["Title"] = "Admin panel";
@@ -11,7 +11,7 @@
         <div class="btn-group" role="group" aria-label="Basic example">
         <p>
             <button class="btn btn-primary">Create Product</button>
-            <a class="btn btn-primary" asp-controller="Categories" asp-action="Index">Back to Categories</a>
+            <a class="btn btn-primary" asp-controller="Category" asp-action="Index">Back to Categories</a>
         </p>
         </div>
     </form>
@@ -41,7 +41,7 @@
                         @item.Name
                     </td>
                     <td>
-                        @GetNameById.Execute(item.CategoryId)
+                        @ProductRepository.GetCategoryName(item.CategoryId)
                     </td>
                     <td>
                         @item.ImageName

@@ -7,11 +7,14 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace OnlineShop.Controllers
 {
     public class AccountController : Controller
     {
+        private readonly ApplicationContext _context;
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
@@ -19,11 +22,13 @@ namespace OnlineShop.Controllers
         public AccountController(
             SignInManager<IdentityUser> signInManager,  
             UserManager<IdentityUser> userManager,
-            RoleManager<IdentityRole> roleManager)
+            RoleManager<IdentityRole> roleManager,
+            ApplicationContext context)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _roleManager = roleManager;
+            _context = context;
         }
 
         public IActionResult Login()
@@ -132,6 +137,7 @@ namespace OnlineShop.Controllers
             }
             return LocalRedirect("/");
         }
+        
 
     }
 }

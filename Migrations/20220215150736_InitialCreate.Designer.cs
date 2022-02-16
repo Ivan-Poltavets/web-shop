@@ -12,7 +12,7 @@ using OnlineShop.Models;
 namespace OnlineShop.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20220213183418_InitialCreate")]
+    [Migration("20220215150736_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -230,8 +230,9 @@ namespace OnlineShop.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 

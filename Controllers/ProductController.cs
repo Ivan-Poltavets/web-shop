@@ -8,13 +8,13 @@ using Microsoft.AspNetCore.Authorization;
 namespace OnlineShop.Controllers
 {
     [Authorize(Roles = UserRoles.Admin)]
-    public class ProductsController : Controller
+    public class ProductController : Controller
     {
         private readonly ApplicationContext _context;
         private readonly IWebHostEnvironment _environment;
 
 
-        public ProductsController(ApplicationContext context)
+        public ProductController(ApplicationContext context)
         {
             _context = context;
         }
@@ -86,7 +86,7 @@ namespace OnlineShop.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,ImagePath,Price")] Product product)
+        public async Task<IActionResult> Edit(int id,Product product)
         {
             if (id != product.Id)
             {
@@ -172,8 +172,12 @@ namespace OnlineShop.Controllers
             {
                 var product = await _context.Products.FindAsync(id);
                 string directory = Path.Combine("wwwroot", "Upload");
-                FileInfo deleteFile = new FileInfo(Path.Combine(directory, product.ImageName));
-                deleteFile.Delete();
+                
+                if (product.ImageName != null)
+                {
+                    FileInfo deleteFile = new FileInfo(Path.Combine(directory, product.ImageName));
+                    deleteFile.Delete();
+                } 
                 string extension = Path.GetExtension(uploadFile.FileName);
                 string fileName = Guid.NewGuid().ToString() + extension;
                 var pathToSave = Path.Combine(directory, fileName);

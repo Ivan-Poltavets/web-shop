@@ -1,0 +1,58 @@
+﻿@{
+    ViewData["Title"] = "Cart";
+}
+
+@model IEnumerable<CartItem>
+@inject IProductRepository ProductRepository
+
+<div class="container">
+    <div id="modDialog" class="modal fade">
+        <div id="dialogContent" class="modal-dialog"></div>
+    </div>
+    @{
+        foreach (var item in Model)
+        {
+            var product = ProductRepository.GetProduct(item.ProductId);
+            <div class="card mb-3" style="width:55rem;padding:0;margin-top:20px;">
+                <div class="row g-0">
+                    <div class="col-md-4">
+                        <img src="~/Upload/@product.ImageName" class="img-fluid rounded-start" style="height:100%">
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card-body">
+                            <h3 class="card-title">
+                                @product.Name
+                            </h3>
+                            <h5>Quantity @item.Quantity</h5>
+                            <a class="btn btn-primary changeQuantity" asp-route-id="@item.Id" asp-action="ChangeQuantity" style="position:absolute;margin-left:29.75rem;margin-top:-40px">Change</a>
+                            <div class="d-flex">
+                                <h4>@(product.Price * item.Quantity)$</h4>
+                                <form method="post" asp-action="Remove" asp-route-id="@item.Id" style="position:absolute;margin-left:30rem">
+                                    <button type="submit" class="btn btn-primary">Delete</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@section scripts
+{
+    <script type="text/javascript">
+ 
+        $(function () {
+            $.ajaxSetup({ cache: false });
+           $(".changeQuantity").click(function (e) {
+ 
+                e.preventDefault();
+                $.get(this.href, function (data) {
+                    $('#dialogContent').html(data);
+                    $('#modDialog').modal('show');
+                });
+            });
+        })
+    </script>
+}

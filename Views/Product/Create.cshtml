@@ -1,21 +1,18 @@
 ﻿@model OnlineShop.Models.Product
-@inject ApplicationContext context
-@inject IEnumerable<OnlineShop.Models.Category> categories
+@inject IProductRepository ProductRepository
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Create";
 }
-<div class="container">
-    <h1>Edit</h1>
 
+<div class="container">
+    <h1>Create</h1>
     <h4>Product</h4>
     <hr />
     <div class="row">
         <div class="col-md-4">
-            <form asp-action="Edit">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                <input type="hidden" asp-for="Id" />
+            <form asp-action="Create" method="post" enctype="multipart/form-data">
                 <div class="form-group">
-                    <label asp-for="Name" class="control-label">Name</label>
+                    <label asp-for="Name" class="control-label"></label>
                     <input asp-for="Name" class="form-control" />
                     <span asp-validation-for="Name" class="text-danger"></span>
                 </div>
@@ -23,7 +20,7 @@
                     <label asp-for="CategoryId" class="control-label"></label>
                     <select asp-for="CategoryId" class="form-control">
                         @{
-                            categories = await context.Categories.ToListAsync();
+                            var categories = ProductRepository.GetCategories();
                             foreach(var cat in categories)
                             {
                                 <option value="@cat.Id">@cat.Name</option>
@@ -33,18 +30,17 @@
                     <span asp-validation-for="CategoryId" class="text-danger"></span>
                 </div>
                 <div class="form-group">
-                    <label asp-for="ImageName" class="control-label">Image Name</label>
-                    <input asp-for="ImageName" class="form-control" readonly />
-                    <span asp-validation-for="ImageName" class="text-danger"></span>
+                    <label class="control-label">Upload image</label>
+                    <input type="file" name="uploadFile" class="form-control" />
                 </div>
                 <div class="form-group">
-                    <label asp-for="Price" class="control-label">Price</label>
-                    <input asp-for="Price" value="@Math.Round(Model.Price)" class="form-control" />
+                    <label asp-for="Price" class="control-label"></label>
+                    <input asp-for="Price" class="form-control" />
                     <span asp-validation-for="Price" class="text-danger"></span>
                 </div>
                 <br />
                 <div class="form-group">
-                    <input type="submit" value="Save" class="btn btn-success" />
+                    <input type="submit" value="Create" class="btn btn-success" />
                 </div>
             </form>
         </div>
@@ -54,6 +50,7 @@
         <a asp-action="Index">Back to List</a>
     </div>
 </div>
+
 @section Scripts {
     @{
     await Html.RenderPartialAsync("_ValidationScriptsPartial");
