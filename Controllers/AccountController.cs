@@ -19,6 +19,7 @@ namespace OnlineShop.Controllers
         private readonly UserManager<IdentityUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
 
+
         public AccountController(
             SignInManager<IdentityUser> signInManager,  
             UserManager<IdentityUser> userManager,
@@ -31,29 +32,23 @@ namespace OnlineShop.Controllers
             _context = context;
         }
 
-        public IActionResult Login()
-        {
-            return View();
-        }
-        public IActionResult Register()
-        {
-            return View();
-        }
-        public IActionResult Logout()
-        {
-            return View();
-        }
-        public IActionResult RegisterAdmin()
-        {
-            return View();
-        }
-        public IActionResult AccessDenied()
-        {
-            return View();
-        }
+        [HttpGet]
+        public IActionResult Login() => View();
+
+        [HttpGet]
+        public IActionResult Register() => View();
+
+        [HttpGet]
+        public IActionResult Logout() => View();
+
+        [HttpGet]
+        public IActionResult RegisterAdmin() => View();
+
+        [HttpGet]
+        public IActionResult AccessDenied() => View();
 
         [HttpPost]
-        public async Task<IActionResult> Login(LoginModel model,bool rememberMe=false,string returnUrl=null)
+        public async Task<IActionResult> Login(LoginModel model, bool rememberMe = false, string returnUrl = null)
         {
             var userExists = await _userManager.FindByNameAsync(model.Username);
             if (userExists == null) return View();
@@ -75,7 +70,9 @@ namespace OnlineShop.Controllers
         {
             var userExists = await _userManager.FindByNameAsync(model.Username);
             if (userExists != null)
+            {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User already exists!" });
+            }      
 
             IdentityUser user = new()
             {
@@ -84,19 +81,23 @@ namespace OnlineShop.Controllers
                 UserName = model.Username
             };
             var result = await _userManager.CreateAsync(user, model.Password);
+
             if(!await _roleManager.RoleExistsAsync(UserRoles.User))
             {
                 await _roleManager.CreateAsync(new IdentityRole(UserRoles.User));
-            }
+            } 
             if(await _roleManager.RoleExistsAsync(UserRoles.User))
             {
                 await _userManager.AddToRoleAsync(user,UserRoles.User);
             }
             if (!result.Succeeded)
+            {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User creation failed!" });
+            }
 
             return LocalRedirect("/Account/Login");
         }
+
         [HttpPost]
         public async Task<IActionResult> RegisterAdmin(RegisterModel model)
         {
@@ -137,8 +138,6 @@ namespace OnlineShop.Controllers
             }
             return LocalRedirect("/");
         }
-        
-
     }
 }
 

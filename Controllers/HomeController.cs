@@ -11,21 +11,22 @@ namespace OnlineShop.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly ApplicationContext _context;
 
+
         public HomeController(ILogger<HomeController> logger,ApplicationContext context)
         {
             _logger = logger;
             _context = context;
         }
-        public async Task<IActionResult> Index()
-        {
-            return View(await _context.Products.ToListAsync());
-        }
+
+        [HttpGet]
+        public async Task<IActionResult> Index() => View(await _context.Products.ToListAsync());
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
         [HttpPost]
         public async Task<IActionResult> Search(string search)
         {

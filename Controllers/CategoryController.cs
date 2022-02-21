@@ -9,18 +9,20 @@ namespace OnlineShop.Controllers
     public class CategoryController : Controller
     {
         private readonly ApplicationContext _context;
+
+
         public CategoryController(ApplicationContext context)
         {
             _context = context;
         }
-        public async Task<IActionResult> Index()
-        {
-            return View(await _context.Categories.ToListAsync());
-        }
-        public IActionResult Create()
-        {
-            return View();
-        }
+
+        [HttpGet]
+        public async Task<IActionResult> Index() => View(await _context.Categories.ToListAsync());
+
+        [HttpGet]
+        public IActionResult Create() => View();
+
+        [HttpGet]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -34,6 +36,8 @@ namespace OnlineShop.Controllers
             }
             return View(category);
         }
+
+        [HttpGet]
         public async Task<IActionResult> Edit(int? id)
         {
             if(id == null)
@@ -47,6 +51,7 @@ namespace OnlineShop.Controllers
             }
             return View(category);
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Category category)
@@ -63,6 +68,7 @@ namespace OnlineShop.Controllers
             }
             return View();
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id,Category category)
@@ -75,6 +81,7 @@ namespace OnlineShop.Controllers
             }
             return View();
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)

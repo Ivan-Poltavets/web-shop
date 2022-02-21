@@ -9,8 +9,9 @@ namespace OnlineShop.Controllers
     {
         private readonly ApplicationContext _context;
         private readonly UserManager<IdentityUser> _userManager;
-        private Cart UserCart { get; set; }
-        public  CartController(
+
+
+        public CartController(
             ApplicationContext context,
             UserManager<IdentityUser> userManager
             )
@@ -18,22 +19,34 @@ namespace OnlineShop.Controllers
             _context = context;
             _userManager = userManager;
         }
+
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
             if (User.Identity.IsAuthenticated)
             {
                 var user = await _userManager.FindByNameAsync(User.Identity.Name);
                 var userCart = await _context.Carts.FirstOrDefaultAsync(x=>x.UserId == user.Id);
-                if (userCart == null)
+                List<CartItem> cartItems = _context.CartItems.Where(x => x.CartId == userCart.Id).ToList();
+                if (userCart == null || cartItems.Count==0)
                     return RedirectToAction(nameof(Empty));
-                return View(_context.CartItems.Where(x=> x.CartId == userCart.Id).ToList());
+                return View(cartItems);
             }
             return Unauthorized();
         }
-        public IActionResult Empty()
+
+        [HttpGet]
+        public IActionResult Empty() => View();
+
+        [HttpGet]
+        public async Task<IActionResult> ChangeQuantity(int id)
         {
-            return View();
+            var cartItem = await _context.CartItems.FindAsync(id);
+            return PartialView(cartItem);
         }
+
+        public IActionResult AddToCart(int? id) => PartialView(id);
+
         [HttpPost]
         public async Task<IActionResult> Remove(int id)
         {
@@ -49,14 +62,9 @@ namespace OnlineShop.Controllers
                 _context.CartItems.Remove(cartItem);
                 await _context.SaveChangesAsync();
             }
-            
             return RedirectToAction(nameof(Index));
         }
-        public async Task<IActionResult> ChangeQuantity(int id)
-        {
-            var cartItem = await _context.CartItems.FindAsync(id);
-            return PartialView(cartItem);
-        }
+
         [HttpPost]
         public async Task<IActionResult> ChangeQuantity(CartItem cartItem)
         {
@@ -64,10 +72,7 @@ namespace OnlineShop.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
-        public IActionResult AddToCart(int? id)
-        {
-            return PartialView(id);
-        }
+
         [HttpPost]
         public async Task<IActionResult> AddToCart(int id)
         {
@@ -100,18 +105,18 @@ namespace OnlineShop.Controllers
                     await _context.SaveChangesAsync();
                 }
                 return LocalRedirect("/");
-                ;
             }
             return View();
         }
+
         [HttpPost]
         public async Task<IActionResult> RemoveFromCart(int? id)
         {
-            if (id == null)
-                return NotFound();
+            if (id == null) return NotFound();
+
             var cartItem = await _context.CartItems.FindAsync(id);
-            if (cartItem == null)
-                return NotFound();
+            if (cartItem == null) return NotFound();
+
             _context.CartItems.Remove(cartItem);
             await _context.SaveChangesAsync();
             return View();

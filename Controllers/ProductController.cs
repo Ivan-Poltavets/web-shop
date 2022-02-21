@@ -19,10 +19,10 @@ namespace OnlineShop.Controllers
             _context = context;
         }
         
-        public async Task<IActionResult> Index()
-        {
-            return View(await _context.Products.ToListAsync());
-        }
+        [HttpGet]
+        public async Task<IActionResult> Index() => View(await _context.Products.ToListAsync());
+
+        [HttpGet]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -39,10 +39,59 @@ namespace OnlineShop.Controllers
 
             return View(product);
         }
-        public IActionResult Create()
+
+        [HttpGet]
+        public IActionResult Create() => View();
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(int? id)
         {
-            return View();
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var product = await _context.Products.FindAsync(id);
+            if (product == null)
+            {
+                return NotFound();
+            }
+            return View(product);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var product = await _context.Products
+                .FirstOrDefaultAsync(x => x.Id == id);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            return View(product);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Upload(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+            var product = await _context.Products.FindAsync(id);
+            if (product == null)
+            {
+                return NotFound();
+            }
+            return View(product);
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Product product,IFormFile uploadFile)
@@ -70,20 +119,7 @@ namespace OnlineShop.Controllers
             }
             return View(product);
         }
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
 
-            var product = await _context.Products.FindAsync(id);
-            if (product == null)
-            {
-                return NotFound();
-            }
-            return View(product);
-        }
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id,Product product)
@@ -115,22 +151,7 @@ namespace OnlineShop.Controllers
             }
             return View(product);
         }
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
 
-            var product = await _context.Products
-                .FirstOrDefaultAsync(x => x.Id == id);
-            if (product == null)
-            {
-                return NotFound();
-            }
-
-            return View(product);
-        }
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -143,26 +164,6 @@ namespace OnlineShop.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
-
-        private bool ProductExists(int id)
-        {
-            return _context.Products.Any(e => e.Id == id);
-        }
-        [HttpGet]
-        public async Task<IActionResult> Upload(int? id)
-        {
-            if(id == null)
-            {
-                return NotFound();
-            }
-            var product = await _context.Products.FindAsync(id);
-            if (product == null)
-            {
-                return NotFound();
-            }
-            return View(product);
-        }
-
 
         [HttpPost,ActionName("Upload")]
         [ValidateAntiForgeryToken]
@@ -193,6 +194,11 @@ namespace OnlineShop.Controllers
             {
                 return BadRequest();
             }
+        }
+
+        private bool ProductExists(int id)
+        {
+            return _context.Products.Any(e => e.Id == id);
         }
     }
 }
