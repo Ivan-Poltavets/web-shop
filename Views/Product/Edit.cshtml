@@ -1,5 +1,5 @@
 ﻿@model OnlineShop.Models.Product
-@inject IProductRepository ProductRepository
+@inject IRepository<Category> CategoryRepository
 @{
     ViewData["Title"] = "Edit";
 }
@@ -22,7 +22,7 @@
                     <label asp-for="CategoryId" class="control-label"></label>
                     <select asp-for="CategoryId" class="form-control">
                         @{
-                            var categories = ProductRepository.GetCategories();
+                            var categories = await CategoryRepository.GetAllAsync();
                             foreach(var cat in categories)
                             {
                                 <option value="@cat.Id">@cat.Name</option>

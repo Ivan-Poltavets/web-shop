@@ -1,5 +1,5 @@
 ﻿@model OnlineShop.Models.Product
-@inject IProductRepository ProductRepository
+@inject IRepository<Category> Repository
 @{
     ViewData["Title"] = "Create";
 }
@@ -17,13 +17,13 @@
                     <span asp-validation-for="Name" class="text-danger"></span>
                 </div>
                 <div class="form-group">
-                    <label asp-for="CategoryId" class="control-label"></label>
+                    <label asp-for="CategoryId" class="control-label">Category</label>
                     <select asp-for="CategoryId" class="form-control">
                         @{
-                            var categories = ProductRepository.GetCategories();
-                            foreach(var cat in categories)
+                            var categories = await Repository.GetAllAsync();
+                            foreach(var category in categories)
                             {
-                                <option value="@cat.Id">@cat.Name</option>
+                                <option value="@category.Id">@category.Name</option>
                             }
                         }
                     </select>

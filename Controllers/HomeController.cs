@@ -30,14 +30,16 @@ namespace OnlineShop.Controllers
         [HttpPost]
         public async Task<IActionResult> Search(string search)
         {
-            if (search == null) return View();
-            List<Product> products = await _context.Products.ToListAsync();
-            Regex regex = new Regex(search,RegexOptions.IgnoreCase);
-            List<Product> searchItems= new List<Product>();
+            if (search == null) 
+                return View();
+
+            var products = await _context.Products.ToListAsync();
+            var regex = new Regex(search,RegexOptions.IgnoreCase);
+            var searchItems= new List<Product>();
             
             foreach(var item in products)
             {
-                Match match = regex.Match(item.Name);
+                var match = regex.Match(item.Name);
                 if (match.Success)
                 {
                     searchItems.Add(item);

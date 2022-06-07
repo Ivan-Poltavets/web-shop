@@ -2,6 +2,7 @@
 using OnlineShop.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
+using OnlineShop.Repository;
 
 namespace OnlineShop.Controllers
 {
@@ -9,15 +10,17 @@ namespace OnlineShop.Controllers
     public class CategoryController : Controller
     {
         private readonly ApplicationContext _context;
+        private readonly IRepository<Category> _repository;
 
 
-        public CategoryController(ApplicationContext context)
+        public CategoryController(ApplicationContext context, IRepository<Category> repository)
         {
             _context = context;
+            _repository = repository;
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index() => View(await _context.Categories.ToListAsync());
+        public async Task<IActionResult> Index() => View(await _repository.GetAllAsync());
 
         [HttpGet]
         public IActionResult Create() => View();
@@ -29,26 +32,32 @@ namespace OnlineShop.Controllers
             {
                 return NotFound();
             }
+
             var category = await _context.Categories.FindAsync(id);
+
             if(category == null)
             {
                 return NotFound();
             }
+
             return View(category);
         }
 
         [HttpGet]
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(int id)
         {
             if(id == null)
             {
                 return NotFound();
             }
-            var category = await _context.Categories.FindAsync(id);
-            if(category == null)
+
+            var category = await _repository.GetByIdAsync(id);
+
+            if (category == null)
             {
                 return NotFound();
             }
+
             return View(category);
         }
 
@@ -60,8 +69,7 @@ namespace OnlineShop.Controllers
             {
                 if(!await _context.Categories.AnyAsync(x=>x.Name == category.Name))
                 {
-                    _context.Categories.Add(category);
-                    await _context.SaveChangesAsync();
+                    await _repository.CreateAsync(category);
                     return RedirectToAction(nameof(Index));
                 }
                 return View();
@@ -75,8 +83,7 @@ namespace OnlineShop.Controllers
         {
             if(ModelState.IsValid)
             {
-                _context.Update(category);
-                await _context.SaveChangesAsync();
+                await _repository.UpdateAsync(category);
                 return RedirectToAction(nameof(Index));
             }
             return View();
@@ -86,11 +93,10 @@ namespace OnlineShop.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            var category = await _context.Categories.FindAsync(id);
+            var category = await _repository.GetByIdAsync(id);
             if (category != null)
             {
-                _context.Remove(category);
-                await _context.SaveChangesAsync();
+                await _repository.DeleteAsync(category.Id);
                 return RedirectToAction(nameof(Index));
             }
             return View();

@@ -1,11 +1,12 @@
-﻿
-
-<div class="container">
-    <h2>Log Out</h2>
-    <hr />
-    <p>Are you sure you want to logout</p>
-    <form method="post" asp-action="Logout">
-        <button class="btn btn-primary" type="submit">Logout</button>
-        <a class="btn btn-danger" asp-controller="Home" asp-action="Index">Cancel</a>
-    </form>
+﻿<div class="modal-content">
+    <div class="modal-header">
+        <h4>Log Out</h4>
+    </div>
+    <div class="modal-body">
+        <h4>Are you sure you want to logout</h4>
+        <form method="post" asp-action="Logout">
+            <button class="btn btn-success" type="submit">Logout</button>
+            <a class="btn btn-danger" asp-controller="Home" asp-action="Index">Cancel</a>
+        </form>
+    </div>
 </div>

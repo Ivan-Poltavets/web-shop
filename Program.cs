@@ -11,7 +11,12 @@ using OnlineShop.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 ConfigurationManager configuration = builder.Configuration;
-builder.Services.AddTransient<IProductRepository, ProductRepository>();
+
+builder.Services.AddScoped<IRepository<Category>, Repository<Category>>();
+builder.Services.AddScoped<IRepository<Product>, Repository<Product>>();
+builder.Services.AddScoped<IRepository<Cart>, Repository<Cart>>();
+builder.Services.AddScoped<IRepository<CartItem>, Repository<CartItem>>();
+
 builder.Services.AddDbContext<ApplicationContext>(options =>
 
     options.UseSqlServer(builder.Configuration.GetConnectionString("OnlineShopContext")));

@@ -3,7 +3,7 @@
 }
 
 @model IEnumerable<CartItem>
-@inject IProductRepository ProductRepository
+@inject IRepository<Product> ProductRepository
 
 <div class="container">
     <div id="modDialog" class="modal fade">
@@ -13,7 +13,7 @@
         decimal totalPrice = 0;
         foreach (var item in Model)
         {
-            var product = ProductRepository.GetProduct(item.ProductId);
+            var product = await ProductRepository.GetByIdAsync(item.ProductId);
             totalPrice += product.Price * item.Quantity;
             <div class="card mb-3" style="width:55rem;height:200px;padding:0;margin-top:20px;">
                 <div class="row g-0">
@@ -26,7 +26,7 @@
                                 @product.Name
                             </h3>
                             <h5>Quantity @item.Quantity</h5>
-                            <a class="btn btn-primary changeQuantity" asp-route-id="@item.Id" asp-action="ChangeQuantity" style="position:absolute;margin-left:29.75rem;margin-top:-40px">Change</a>
+                            <a class="btn btn-primary modalWindow" asp-route-id="@item.Id" asp-action="ChangeQuantity" style="position:absolute;margin-left:29.75rem;margin-top:-40px">Change</a>
                             <div class="d-flex">
                                 <h4>@(product.Price * item.Quantity)$</h4>
                                 <form method="post" asp-action="Remove" asp-route-id="@item.Id" style="position:absolute;margin-left:30rem">
@@ -45,18 +45,5 @@
 
 @section scripts
 {
-    <script type="text/javascript">
  
-        $(function () {
-            $.ajaxSetup({ cache: false });
-           $(".changeQuantity").click(function (e) {
- 
-                e.preventDefault();
-                $.get(this.href, function (data) {
-                    $('#dialogContent').html(data);
-                    $('#modDialog').modal('show');
-                });
-            });
-        })
-    </script>
 }

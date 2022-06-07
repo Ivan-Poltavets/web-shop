@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OnlineShop.Models;
+using OnlineShop.Repository;
 
 namespace OnlineShop.Controllers
 {
@@ -9,15 +10,21 @@ namespace OnlineShop.Controllers
     {
         private readonly ApplicationContext _context;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly IRepository<Cart> _cartRepository;
+        private readonly IRepository<CartItem> _itemRepository;
 
 
         public CartController(
             ApplicationContext context,
-            UserManager<IdentityUser> userManager
+            UserManager<IdentityUser> userManager,
+            IRepository<Cart> cartRepository,
+            IRepository<CartItem> itemRepository
             )
         {
             _context = context;
             _userManager = userManager;
+            _cartRepository = cartRepository;
+            _itemRepository = itemRepository;
         }
 
         [HttpGet]
@@ -27,8 +34,14 @@ namespace OnlineShop.Controllers
             {
                 var user = await _userManager.FindByNameAsync(User.Identity.Name);
                 var userCart = await _context.Carts.FirstOrDefaultAsync(x=>x.UserId == user.Id);
+                if(userCart == null)
+                {
+                    userCart = new Cart { UserId = user.Id };
+                    await _cartRepository.CreateAsync(userCart);
+                }
                 List<CartItem> cartItems = _context.CartItems.Where(x => x.CartId == userCart.Id).ToList();
-                if (userCart == null || cartItems.Count==0)
+
+                if (cartItems.Count == 0)
                     return RedirectToAction(nameof(Empty));
                 return View(cartItems);
             }
@@ -45,6 +58,7 @@ namespace OnlineShop.Controllers
             return PartialView(cartItem);
         }
 
+        [HttpGet]
         public IActionResult AddToCart(int? id) => PartialView(id);
 
         [HttpPost]
@@ -53,14 +67,15 @@ namespace OnlineShop.Controllers
             if (User.Identity.IsAuthenticated)
             {
                 var user = await _userManager.FindByNameAsync(User.Identity.Name);
-                var userCart = await _context.Carts.FirstOrDefaultAsync(x=>x.UserId == user.Id);
+                var userCart = await _context.Carts.FirstOrDefaultAsync(x => x.UserId == user.Id);
                 if (userCart == null)
                     return View();
+
                 var cartItem = await _context.CartItems.FirstOrDefaultAsync(x => x.Id == id);
                 if (cartItem == null)
                     return View();
-                _context.CartItems.Remove(cartItem);
-                await _context.SaveChangesAsync();
+
+                await _itemRepository.DeleteAsync(cartItem.Id);
             }
             return RedirectToAction(nameof(Index));
         }
@@ -68,8 +83,7 @@ namespace OnlineShop.Controllers
         [HttpPost]
         public async Task<IActionResult> ChangeQuantity(CartItem cartItem)
         {
-            _context.Update(cartItem);
-            await _context.SaveChangesAsync();
+            await _itemRepository.UpdateAsync(cartItem);
             return RedirectToAction(nameof(Index));
         }
 
@@ -80,11 +94,12 @@ namespace OnlineShop.Controllers
             {
                 var user = await _userManager.FindByNameAsync(User.Identity.Name);
                 var userCart = new Cart { UserId = user.Id };
+
                 if (!await _context.Carts.AnyAsync(x => x.UserId == userCart.UserId))
                 {
-                    _context.Carts.Add(userCart);
-                    await _context.SaveChangesAsync();
+                    await _cartRepository.CreateAsync(userCart);
                 }
+
                 var cart = await _context.Carts.FirstOrDefaultAsync(x => x.UserId == userCart.UserId);
                 CartItem cartItem = new CartItem
                 {
@@ -92,17 +107,16 @@ namespace OnlineShop.Controllers
                     ProductId = id,
                     Quantity = 1
                 };
+
                 if (await _context.CartItems.AnyAsync(x => x.ProductId == id && x.CartId == cart.Id))
                 {
                     var existCartItem = _context.CartItems.FirstOrDefault(x => x.ProductId == id && x.CartId == cart.Id);
                     existCartItem.Quantity += 1;
-                    _context.CartItems.Update(existCartItem);
-                    await _context.SaveChangesAsync();
+                    await _itemRepository.UpdateAsync(existCartItem);
                 }
                 else
                 {
-                    _context.CartItems.Add(cartItem);
-                    await _context.SaveChangesAsync();
+                    await _itemRepository.CreateAsync(cartItem);
                 }
                 return LocalRedirect("/");
             }
@@ -117,8 +131,7 @@ namespace OnlineShop.Controllers
             var cartItem = await _context.CartItems.FindAsync(id);
             if (cartItem == null) return NotFound();
 
-            _context.CartItems.Remove(cartItem);
-            await _context.SaveChangesAsync();
+            await _itemRepository.DeleteAsync(cartItem.Id);
             return View();
         }
     }

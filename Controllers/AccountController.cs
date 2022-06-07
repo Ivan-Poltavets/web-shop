@@ -1,20 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
-using System.IdentityModel.Tokens.Jwt;
-using Microsoft.IdentityModel.Tokens;
 using OnlineShop.Models;
-using System.Text;
-using Microsoft.AspNetCore.Authentication;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using System.Linq;
-using Microsoft.EntityFrameworkCore;
 
 namespace OnlineShop.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly ApplicationContext _context;
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
@@ -23,13 +14,11 @@ namespace OnlineShop.Controllers
         public AccountController(
             SignInManager<IdentityUser> signInManager,  
             UserManager<IdentityUser> userManager,
-            RoleManager<IdentityRole> roleManager,
-            ApplicationContext context)
+            RoleManager<IdentityRole> roleManager)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _roleManager = roleManager;
-            _context = context;
         }
 
         [HttpGet]
@@ -39,7 +28,7 @@ namespace OnlineShop.Controllers
         public IActionResult Register() => View();
 
         [HttpGet]
-        public IActionResult Logout() => View();
+        public IActionResult Logout() => PartialView();
 
         [HttpGet]
         public IActionResult RegisterAdmin() => View();
@@ -48,20 +37,22 @@ namespace OnlineShop.Controllers
         public IActionResult AccessDenied() => View();
 
         [HttpPost]
-        public async Task<IActionResult> Login(LoginModel model, bool rememberMe = false, string returnUrl = null)
+        public async Task<IActionResult> Login(LoginModel model, bool rememberMe = false, string returnUrl = "/")
         {
             var userExists = await _userManager.FindByNameAsync(model.Username);
-            if (userExists == null) return View();
+            if (userExists == null) 
+                return View();
+
             if (await _userManager.CheckPasswordAsync(userExists, model.Password))
             {
                 var result = await _signInManager.PasswordSignInAsync(userExists, model.Password, rememberMe, lockoutOnFailure: true);
+
                 if (result.Succeeded)
                 {
-                    if (returnUrl != null) return LocalRedirect(returnUrl);
-                    return LocalRedirect("/");
+                    return LocalRedirect(returnUrl);
                 }
-                return View();
             }
+
             return View();
         }
 
@@ -71,7 +62,7 @@ namespace OnlineShop.Controllers
             var userExists = await _userManager.FindByNameAsync(model.Username);
             if (userExists != null)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User already exists!" });
+                return View();
             }      
 
             IdentityUser user = new()
@@ -80,22 +71,22 @@ namespace OnlineShop.Controllers
                 SecurityStamp = Guid.NewGuid().ToString(),
                 UserName = model.Username
             };
+
             var result = await _userManager.CreateAsync(user, model.Password);
 
             if(!await _roleManager.RoleExistsAsync(UserRoles.User))
             {
                 await _roleManager.CreateAsync(new IdentityRole(UserRoles.User));
             } 
+
             if(await _roleManager.RoleExistsAsync(UserRoles.User))
             {
                 await _userManager.AddToRoleAsync(user,UserRoles.User);
             }
-            if (!result.Succeeded)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User creation failed!" });
-            }
 
-            return LocalRedirect("/Account/Login");
+            await _signInManager.SignInAsync(user, false);
+
+            return LocalRedirect("/");
         }
 
         [HttpPost]
@@ -103,17 +94,21 @@ namespace OnlineShop.Controllers
         {
             var user = await _userManager.FindByNameAsync(model.Username);
             if (user != null) return View();
+
             IdentityUser admin = new()
             {
                 Email = model.Email,
                 SecurityStamp = Guid.NewGuid().ToString(),
                 UserName = model.Username
             };
+
             var result = await _userManager.CreateAsync(admin, model.Password);
+
             if(!await _roleManager.RoleExistsAsync(UserRoles.Admin))
             {
                 await _roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
             }
+
             if(!await _roleManager.RoleExistsAsync(UserRoles.User))
             {
                 await _roleManager.CreateAsync(new IdentityRole(UserRoles.User));
@@ -121,10 +116,12 @@ namespace OnlineShop.Controllers
             
             await _userManager.AddToRoleAsync(admin,UserRoles.User);
             await _userManager.AddToRoleAsync(admin, UserRoles.Admin);
+
             if (!result.Succeeded)
             {
                 return View();
             }
+
             return LocalRedirect("/Account/Login");
         }
 

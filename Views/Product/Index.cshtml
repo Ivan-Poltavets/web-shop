@@ -1,5 +1,5 @@
 ﻿@model IEnumerable<OnlineShop.Models.Product>
-@inject IProductRepository ProductRepository
+@inject IRepository<Category> CategoryRepository
 
 @{
     ViewData["Title"] = "Admin panel";
@@ -41,7 +41,7 @@
                         @item.Name
                     </td>
                     <td>
-                        @ProductRepository.GetCategoryName(item.CategoryId)
+                        @await CategoryRepository.GetByIdAsync(item.CategoryId)
                     </td>
                     <td>
                         @item.ImageName

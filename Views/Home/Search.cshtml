@@ -1,6 +1,10 @@
-﻿@model IEnumerable<OnlineShop.Models.Product>
+﻿@model IEnumerable<Product>
 
-
+<style>
+    form{
+        padding-bottom: 20px;
+    }
+</style>
 <div class="container">
     <h1>Search result</h1>
     <hr />
@@ -13,7 +17,6 @@
                 </svg>
             </button>
         </div>
-
     </form>
 </div>
 <div class="container">
@@ -28,7 +31,7 @@
                 <div class="card mb-3" style="width:16rem;padding:0;margin-left:20px">
                     @if (item.ImageName != "null")
                     {
-                        <img src="~/Upload/@item.ImageName" class="card-img-top" style="width:100%;height:150px;">
+                        <img src="~/Upload/@item.ImageName" class="card-img-top" style="margin-left:13%;margin-top:13%;width:74%;height:150px;">
                     }
                     else
                     {
@@ -37,7 +40,7 @@
                     <div class="card-body">
                         <h5 class="card-title">@item.Name</h5>
                         <h5 class="card-text">@(item.Price)$</h5>
-                        <a class="btn btn-success addCartItem" asp-controller="Cart" asp-action="AddToCart" asp-route-id="@item.Id">Add to cart</a>
+                        <a class="btn btn-success modalWindow" asp-controller="Cart" asp-action="AddToCart" asp-route-id="@item.Id">Add to cart</a>
                     </div>
                 </div>
             }
@@ -45,21 +48,3 @@
     </div>
     <div class=""></div>
 </div>
-
-@section scripts
-{
-<script type="text/javascript">
-
-    $(function () {
-        $.ajaxSetup({ cache: false });
-       $(".addCartItem").click(function (e) {
-
-            e.preventDefault();
-            $.get(this.href, function (data) {
-                $('#dialogContent').html(data);
-                $('#modDialog').modal('show');
-            });
-        });
-    })
-</script>
-}

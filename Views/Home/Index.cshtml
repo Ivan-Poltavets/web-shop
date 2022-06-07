@@ -2,10 +2,14 @@
     ViewData["Title"] = "Home Page";
 }
 
-@model IEnumerable<OnlineShop.Models.Product>
+@model IEnumerable<Product>
 <link href="~/css/carousel.css" rel="stylesheet" />
-
-<div class="container">
+<style>
+    .items{
+        margin-top: 20px;
+    }
+</style>
+<div class="container items">
     <div id="modDialog" class="modal fade">
         <div id="dialogContent" class="modal-dialog"></div>
     </div>
@@ -24,28 +28,10 @@
                 <div class="card-body">
                     <h5 class="card-title">@item.Name</h5>
                     <h5 class="card-text">@(item.Price)$</h5>
-                    <a class="btn btn-success addCartItem" asp-controller="Cart" asp-action="AddToCart" asp-route-id="@item.Id">Add to cart</a>
+                    <a class="btn btn-success modalWindow" asp-controller="Cart" asp-action="AddToCart" asp-route-id="@item.Id">Add to cart</a>
                 </div>
             </div>
         }
     </div>
     <div class=""></div>
 </div>
-
-@section scripts
-{
-<script type="text/javascript">
-
-    $(function () {
-        $.ajaxSetup({ cache: false });
-       $(".addCartItem").click(function (e) {
-
-            e.preventDefault();
-            $.get(this.href, function (data) {
-                $('#dialogContent').html(data);
-                $('#modDialog').modal('show');
-            });
-        });
-    })
-</script>
-}

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OnlineShop.Models;
 using Microsoft.AspNetCore.Authorization;
+using OnlineShop.Repository;
 
 namespace OnlineShop.Controllers
 {
@@ -12,15 +13,16 @@ namespace OnlineShop.Controllers
     {
         private readonly ApplicationContext _context;
         private readonly IWebHostEnvironment _environment;
+        private readonly IRepository<Product> _repository;
 
-
-        public ProductController(ApplicationContext context)
+        public ProductController(ApplicationContext context, IRepository<Product> repository)
         {
             _context = context;
+            _repository = repository;
         }
         
         [HttpGet]
-        public async Task<IActionResult> Index() => View(await _context.Products.ToListAsync());
+        public async Task<IActionResult> Index() => View(await _repository.GetAllAsync());
 
         [HttpGet]
         public async Task<IActionResult> Details(int? id)
@@ -104,17 +106,14 @@ namespace OnlineShop.Controllers
                     string fileName = Guid.NewGuid().ToString() + extension;
                     string pathToSave = Path.Combine("wwwroot", "Upload", fileName);
                     using(var stream = new FileStream(pathToSave, FileMode.Create))
-                    {
                         await uploadFile.CopyToAsync(stream);
-                    }
                     product.ImageName = fileName;
                 }
                 else
                 {
                     product.ImageName = "null";
                 }
-                _context.Add(product);
-                await _context.SaveChangesAsync();
+                await _repository.CreateAsync(product);
                 return RedirectToAction(nameof(Index));
             }
             return View(product);
@@ -133,8 +132,7 @@ namespace OnlineShop.Controllers
             {
                 try
                 {
-                    _context.Update(product);
-                    await _context.SaveChangesAsync();
+                    await _repository.UpdateAsync(product);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -156,12 +154,11 @@ namespace OnlineShop.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var product = await _context.Products.FindAsync(id);
+            var product = await _repository.GetByIdAsync(id);
             string pathFile = Path.Combine("wwwroot", "Upload", product.ImageName);
             FileInfo file = new FileInfo(pathFile);
             file.Delete();
-            _context.Products.Remove(product);
-            await _context.SaveChangesAsync();
+            await _repository.DeleteAsync(product.Id);
             return RedirectToAction(nameof(Index));
         }
 
@@ -171,7 +168,7 @@ namespace OnlineShop.Controllers
         {
             if(uploadFile != null)
             {
-                var product = await _context.Products.FindAsync(id);
+                var product = await _repository.GetByIdAsync(id);
                 string directory = Path.Combine("wwwroot", "Upload");
                 
                 if (product.ImageName != null)
@@ -187,7 +184,7 @@ namespace OnlineShop.Controllers
                     await uploadFile.CopyToAsync(stream);
                 }
                 product.ImageName = fileName;
-                await _context.SaveChangesAsync();
+                await _repository.UpdateAsync(product);
                 return RedirectToAction(nameof(Index));
             }
             else
